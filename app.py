@@ -150,4 +150,8 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0', port=port)
+   import os
+
+port = int(os.environ.get("PORT", 10000))  # use the PORT environment variable if present
+app.run(host='0.0.0.0', port=port)
+
