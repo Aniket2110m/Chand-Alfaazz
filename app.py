@@ -9,16 +9,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
 app.config['SECRET_KEY'] = 'your_secret_key_here'  # Needed for flash messages and sessions
 db = SQLAlchemy(app)
 
-# User model
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-
-
-# Blog post model
 
 
 class BlogPost(db.Model):
@@ -73,85 +68,4 @@ def logout():
     session.pop('user_id', None)
     session.pop('username', None)
     flash('Logged out successfully.', 'info')
-    return redirect(url_for('index'))
-
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    query = request.args.get('q', '')
-    page = request.args.get('page', 1, type=int)
-    per_page = 5
-    if query:
-        posts_query = BlogPost.query.filter(
-            (BlogPost.title.ilike(f'%{query}%')) |
-            (BlogPost.content.ilike(f'%{query}%'))
-        ).order_by(BlogPost.date_posted.desc())
-    else:
-        posts_query = BlogPost.query.order_by(BlogPost.date_posted.desc())
-    posts = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-    return render_template('index.html', posts=posts.items, query=query, pagination=posts)
-
-
-@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
-def post(post_id):
-    post = BlogPost.query.get_or_404(post_id)
-    if request.method == 'POST':
-        author = request.form['author']
-        content = request.form['content']
-        new_comment = Comment(post_id=post.id, author=author, content=content)
-        db.session.add(new_comment)
-        db.session.commit()
-        flash('Comment added!', 'success')
-        return redirect(url_for('post', post_id=post.id))
-    comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.date_posted.asc()).all()
-    return render_template('post.html', post=post, comments=comments)
-
-
-@app.route('/create', methods=['GET', 'POST'])
-def create():
-    if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
-        new_post = BlogPost(title=title, content=content)
-        db.session.add(new_post)
-        db.session.commit()
-        flash('Post created successfully!', 'success')
-        return redirect('/')
-    return render_template('create.html')
-
-
-@app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
-def edit(post_id):
-    post = BlogPost.query.get_or_404(post_id)
-    if request.method == 'POST':
-        post.title = request.form['title']
-        post.content = request.form['content']
-        db.session.commit()
-        flash('Post updated successfully!', 'success')
-        return redirect(url_for('post', post_id=post.id))
-    return render_template('edit.html', post=post)
-
-
-@app.route('/delete/<int:post_id>')
-def delete(post_id):
-    post = BlogPost.query.get_or_404(post_id)
-    db.session.delete(post)
-    db.session.commit()
-    flash('Post deleted successfully!', 'info')
-    return redirect('/')
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
-    with app.app_context():
-        db.create_all()
-   import os
-
-port = int(os.environ.get("PORT", 10000))  # use the PORT environment variable if present
-app.run(host='0.0.0.0', port=port)
-
+    return redirect(url_for('index'))_
