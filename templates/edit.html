@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-4">
+    <h2 class="mb-3">Edit Post</h2>
+    <form method="POST">
+        <input class="form-control my-2" name="title" value="{{ post.title }}" required>
+        <textarea class="form-control my-2" name="content" rows="10" required>{{ post.content }}</textarea>
+        <button class="btn btn-success mt-2">Update</button>
+        <a href="/" class="btn btn-outline-secondary mt-2 ms-2">Cancel</a>
+    </form>
+</div>
+{% endblock %}
